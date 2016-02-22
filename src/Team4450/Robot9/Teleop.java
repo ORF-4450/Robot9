@@ -84,7 +84,6 @@ class Teleop
 		lpControl.controlType = LaunchPadControlTypes.SWITCH;
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_YELLOW);
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_BLUE);
-		launchPad.AddControl(LaunchPadControlIDs.BUTTON_GREEN);
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_RED);
         launchPad.addLaunchPadEventListener(new LaunchPadListener());
         launchPad.Start();
@@ -127,7 +126,7 @@ class Teleop
 			{
     			rightY = rightStick.GetY() * -1.0;		// fwd/back right
     			leftY = leftStick.GetY() * -1.0; 	// fwd/back left
-    			utilY = 0.5*utilityStick.GetY(); //move util arm
+    			utilY = 0.75*utilityStick.GetY(); //move util arm
 			}
 			else
 			{
