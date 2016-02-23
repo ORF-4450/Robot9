@@ -29,11 +29,12 @@ import edu.wpi.first.wpilibj.Talon;
 
 public class Robot extends SampleRobot 
 {
-  static final String  	PROGRAM_NAME = "RAC9-02.20.16-01";
+  static final String  	PROGRAM_NAME = "RAC+SWF9-02.21.16-04";
 
   // Motor CAN ID/PWM port assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
   CANTalon				LFCanTalon, LRCanTalon, RFCanTalon, RRCanTalon, LSlaveCanTalon, RSlaveCanTalon;
   Talon					LFPwmTalon, LRPwmTalon, RFPwmTalon, RRPwmTalon;
+  Talon 				utilMotor;
   RobotDrive      		robotDrive;
   
   final Joystick        utilityStick = new Joystick(2);	// 0 old ds configuration
@@ -277,6 +278,9 @@ public class Robot extends SampleRobot
 	  LSlaveCanTalon = new CANTalon(5);
 	  RSlaveCanTalon = new CANTalon(6);
 	  
+	  utilMotor = new Talon(2); //TODO Check this motor assignment
+	  utilMotor.setInverted(true);
+	  
 	  robotDrive = new RobotDrive(LFCanTalon, LRCanTalon, RFCanTalon, RRCanTalon);
 
       // Initialize CAN Talons and write status to log so we can verify
@@ -306,6 +310,8 @@ public class Robot extends SampleRobot
 	  RRPwmTalon = new Talon(4);
 	  
 	  robotDrive = new RobotDrive(LFPwmTalon, LRPwmTalon, RFPwmTalon, RRPwmTalon);
+	  
+	  //utilMotor = new Talon(1234567890); //TODO check this motor number
   }
   
   // Initialize and Log status indication from CANTalon. If we see an exception

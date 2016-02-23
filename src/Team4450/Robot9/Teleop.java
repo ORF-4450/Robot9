@@ -59,7 +59,7 @@ class Teleop
 
 	void OperatorControl()
 	{
-		double	rightY, leftY;
+		double	rightY, leftY, utilY;
         
         // Motor safety turned off during initialization.
         robot.robotDrive.setSafetyEnabled(false);
@@ -84,7 +84,6 @@ class Teleop
 		lpControl.controlType = LaunchPadControlTypes.SWITCH;
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_YELLOW);
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_BLUE);
-		launchPad.AddControl(LaunchPadControlIDs.BUTTON_GREEN);
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_RED);
         launchPad.addLaunchPadEventListener(new LaunchPadListener());
         launchPad.Start();
@@ -121,16 +120,19 @@ class Teleop
 			{
 				rightY = utilityStick.GetY();
 				leftY = rightY;
+				utilY = 0;
 			} 
 			else if (invertDrive)
 			{
     			rightY = rightStick.GetY() * -1.0;		// fwd/back right
-    			leftY = leftStick.GetY() * -1.0;		// fwd/back left
+    			leftY = leftStick.GetY() * -1.0; 	// fwd/back left
+    			utilY = 0.75*utilityStick.GetY(); //move util arm
 			}
 			else
 			{
 				rightY = rightStick.GetY();		// fwd/back right
     			leftY = leftStick.GetY();		// fwd/back left
+       			utilY = 0.75*utilityStick.GetY(); //move util arm
 			}
 			
 			LCD.printLine(4, "leftY=%.4f  rightY=%.4f", leftY, rightY);
@@ -141,6 +143,7 @@ class Teleop
 			// Set motors.
 
 			robot.robotDrive.tankDrive(leftY, rightY);
+			robot.utilMotor.set(utilY);
 
 			// End of driving loop.
 			
@@ -206,7 +209,7 @@ class Teleop
 			
 			// Change which USB camera is being served by the RoboRio when using dual usb cameras.
 			
-			if (launchPadEvent.control.id.equals(LaunchPad.LaunchPadControlIDs.BUTTON_BLACK))
+			if (launchPadEvent.control.id.equals(LaunchPad.LaunchPadControlIDs.BUTTON_YELLOW) || launchPadEvent.control.id.equals(LaunchPad.LaunchPadControlIDs.BUTTON_BLACK))
 				if (launchPadEvent.control.latchedState)
 					shooter.HoodUp();
 				else
@@ -223,15 +226,9 @@ class Teleop
 				else
 					shooter.PickupArmUp();
 	
-			if (launchPadEvent.control.id == LaunchPadControlIDs.BUTTON_BLUE)
-			{
-				if (launchPadEvent.control.latchedState)
-    				shifterHigh();
-    			else
-    				shifterLow();
-			}
+			
 
-			if (launchPadEvent.control.id == LaunchPadControlIDs.BUTTON_YELLOW)
+			if (launchPadEvent.control.id == LaunchPadControlIDs.BUTTON_BLUE)
 			{
 				if (launchPadEvent.control.latchedState)
 				{
@@ -280,6 +277,10 @@ class Teleop
 			
 			if (joyStickEvent.button.id.equals(JoyStickButtonIDs.TOP_MIDDLE))
 				shooter.StopAutoShoot();
+			
+			if (joyStickEvent.button.id.equals(JoyStickButtonIDs.TRIGGER))
+				invertDrive = joyStickEvent.button.latchedState;
+
 	    }
 
 	    public void ButtonUp(JoyStickEvent joyStickEvent) 
@@ -297,8 +298,14 @@ class Teleop
 	    {
 			Util.consoleLog("%s, latchedState=%b", joyStickEvent.button.id.name(),  joyStickEvent.button.latchedState);
 			
+						
 			if (joyStickEvent.button.id.equals(JoyStickButtonIDs.TRIGGER))
-				invertDrive = joyStickEvent.button.latchedState;
+			{
+				if (joyStickEvent.button.latchedState)
+    				shifterHigh();
+    			else
+    				shifterLow();
+			}
 	    }
 
 	    public void ButtonUp(JoyStickEvent joyStickEvent) 
