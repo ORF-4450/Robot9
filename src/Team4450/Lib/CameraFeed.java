@@ -2,10 +2,7 @@
 package Team4450.Lib;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.imgproc.Imgproc;
 
-import Team4450.Robot9.GripPipeline;
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.MjpegServer;
@@ -13,7 +10,6 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.vision.VisionThread;
 
 /**
  * USB camera feed task. Runs as a thread separate from Robot class.
@@ -92,7 +88,7 @@ public class CameraFeed extends Thread
             // Create cameras.
             // Using one camera at this time.
             // You have to look at the RoboRio web page to see what
-            // number the camera 1s assigned to. The name here is
+            // number the camera is assigned to. The name here is
             // whatever you would like it to be.
 
 //            if (this.isCompetitionRobot)
