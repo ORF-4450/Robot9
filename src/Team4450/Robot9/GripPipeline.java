@@ -28,7 +28,6 @@ import org.opencv.objdetect.*;
 public class GripPipeline implements VisionPipeline {
 
 	//Outputs
-	private Mat resizeImageOutput = new Mat();
 	private Mat hsvThresholdOutput = new Mat();
 	private Mat blurOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
@@ -42,16 +41,9 @@ public class GripPipeline implements VisionPipeline {
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
 	@Override	public void process(Mat source0) {
-		// Step Resize_Image0:
-		Mat resizeImageInput = source0;
-		double resizeImageWidth = 640.0;
-		double resizeImageHeight = 480.0;
-		int resizeImageInterpolation = Imgproc.INTER_CUBIC;
-		resizeImage(resizeImageInput, resizeImageWidth, resizeImageHeight, resizeImageInterpolation, resizeImageOutput);
-
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = source0;
-		double[] hsvThresholdHue = {18.345326313869553, 128.80546270376993};
+		double[] hsvThresholdHue = {12.695608530345735, 128.80546270376993};
 		double[] hsvThresholdSaturation = {0.0, 30.170651230795784};
 		double[] hsvThresholdValue = {220.14386739662223, 255.0};
 		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
@@ -69,27 +61,19 @@ public class GripPipeline implements VisionPipeline {
 
 		// Step Filter_Contours0:
 		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		double filterContoursMinArea = 2500.0;
+		double filterContoursMinArea = 750.0;
 		double filterContoursMinPerimeter = 0.0;
-		double filterContoursMinWidth = 100.0;
-		double filterContoursMaxWidth = 200.0;
-		double filterContoursMinHeight = 50.0;
-		double filterContoursMaxHeight = 100.0;
-		double[] filterContoursSolidity = {31.09038436166831, 48.900770163578564};
+		double filterContoursMinWidth = 50.0;
+		double filterContoursMaxWidth = 75.0;
+		double filterContoursMinHeight = 30.0;
+		double filterContoursMaxHeight = 50.0;
+		double[] filterContoursSolidity = {28.579395806507247, 54.842541944534375};
 		double filterContoursMaxVertices = 1000000.0;
 		double filterContoursMinVertices = 0.0;
 		double filterContoursMinRatio = 0.0;
 		double filterContoursMaxRatio = 1000.0;
 		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
-	}
-
-	/**
-	 * This method is a generated getter for the output of a Resize_Image.
-	 * @return Mat output from Resize_Image.
-	 */
-	public Mat resizeImageOutput() {
-		return resizeImageOutput;
 	}
 
 	/**
@@ -124,19 +108,6 @@ public class GripPipeline implements VisionPipeline {
 		return filterContoursOutput;
 	}
 
-
-	/**
-	 * Scales and image to an exact size.
-	 * @param input The image on which to perform the Resize.
-	 * @param width The width of the output in pixels.
-	 * @param height The height of the output in pixels.
-	 * @param interpolation The type of interpolation.
-	 * @param output The image in which to store the output.
-	 */
-	private void resizeImage(Mat input, double width, double height,
-		int interpolation, Mat output) {
-		Imgproc.resize(input, output, new Size(width, height), 0.0, 0.0, interpolation);
-	}
 
 	/**
 	 * Segment an image based on hue, saturation, and value ranges.

@@ -2,7 +2,10 @@
 package Team4450.Lib;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
+import Team4450.Robot9.GripPipeline;
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.MjpegServer;
@@ -10,6 +13,7 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.vision.VisionThread;
 
 /**
  * USB camera feed task. Runs as a thread separate from Robot class.
@@ -31,10 +35,10 @@ public class CameraFeed extends Thread
 	private CvSink				imageSource;
 	private CvSource			imageOutputStream;
 	private boolean				changingCamera;
-
+	
 	// Camera settings - Static
-	public static final int 	width = 320; //640;
-	public static final int 	height = 240; //480;
+	public static final int 	imageWidth = 320; //640;
+	public static final int 	imageHeight = 240; //480;
 	//public static final double 	fovH = 48.0;
 	//public static final double 	fovV = 32.0;
 	public static final	double	frameRate = 20;		// frames per second
@@ -73,7 +77,7 @@ public class CameraFeed extends Thread
 
             // Create Mjpeg stream server.
             
-            mjpegServer = CameraServer.getInstance().addServer("4450-mjpegServer", 1181);
+            mjpegServer = CameraServer.getInstance().addServer("4450-mjpegServer", 1180);
 
             // Create image source.
             
@@ -81,7 +85,7 @@ public class CameraFeed extends Thread
             
             // Create output image stream.
             
-            imageOutputStream = new CvSource("4450-CvSource", VideoMode.PixelFormat.kMJPEG, width, height, (int) frameRate);
+            imageOutputStream = new CvSource("4450-CvSource", VideoMode.PixelFormat.kMJPEG, imageWidth, imageHeight, (int) frameRate);
             
             mjpegServer.setSource(imageOutputStream);
             
@@ -112,8 +116,8 @@ public class CameraFeed extends Thread
             }
             else
             {
-            	cam1 = new UsbCamera("cam0", 0);
-    			cam2 = new UsbCamera("cam1", 1);
+            	cam1 = new UsbCamera("cam1", 1);
+    			cam2 = new UsbCamera("cam0", 0);
             }
 
             updateCameraSettings(cam1);
@@ -135,7 +139,7 @@ public class CameraFeed extends Thread
 	{
 		Util.consoleLog();
 
-		camera.setResolution(width, height);
+		camera.setResolution(imageWidth, imageHeight);
 		camera.setFPS((int) frameRate);
 		camera.setExposureManual(exposure);
 		camera.setWhiteBalanceManual(whitebalance);
@@ -174,7 +178,7 @@ public class CameraFeed extends Thread
 		
 	    synchronized (this) 
 	    {
-	    	return image;
+	    	return image.clone();
 	    }
 	}
 	
@@ -241,9 +245,9 @@ public class CameraFeed extends Thread
 		    synchronized (this) 
 		    {
 		    	imageSource.grabFrame(image);
-		    	
-		    	imageOutputStream.putFrame(image);
 		    }
+		    
+		    imageOutputStream.putFrame(image);
 		}
     }
 }

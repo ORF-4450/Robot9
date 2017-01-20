@@ -556,8 +556,8 @@ class Teleop
 	 */
 	void seekTargetGrip2()
 	{
-		int				targetOffset, imageCenter = CameraFeed.width / 2, centerX;
-		Rect			targetRectangle;
+		int				targetOffset, imageCenter = CameraFeed.imageWidth / 2, centerX;
+		Rect			targetRectangle = null, rectangle = null;
 		
 		// Since the turret camera is incorrectly mounted and points a bit left of 
 		// turrent centerline, when we line up the target with the camera centerline
@@ -577,20 +577,28 @@ class Teleop
 		SmartDashboard.putBoolean("TargetLocked", false);
 		SmartDashboard.putBoolean("AutoTarget", autoTarget);
 
+		robot.robotDrive.setSafetyEnabled(false);
+
 		gripPipeline.process(robot.cameraThread.getCurrentImage());
 		
-		targetRectangle = Imgproc.boundingRect(gripPipeline.findContoursOutput().get(0));
-
-		robot.robotDrive.setSafetyEnabled(false);
+		if (!gripPipeline.filterContoursOutput().isEmpty())
+			targetRectangle = Imgproc.boundingRect(gripPipeline.filterContoursOutput().get(0));
 		
 		while (robot.isEnabled() && autoTarget && targetRectangle != null)
 		{
-			centerX = targetRectangle.x + (64 / 2);
+			centerX = targetRectangle.x + targetRectangle.width / 2;
 
-			Util.consoleLog("x=%d y=%d c=%d h=%d w=%d",targetRectangle.x, targetRectangle.y, centerX, targetRectangle.height,
-					         targetRectangle.width);
-
-			// Image is Grip.IMAGE_WIDTH pixels wide. 5px target zone.
+			Util.consoleLog("x=%d y=%d c=%d h=%d w=%d cnt=%d", targetRectangle.x, targetRectangle.y, centerX, targetRectangle.height,
+					         targetRectangle.width, gripPipeline.filterContoursOutput().size());
+			
+//			for(int i = 0; i < gripPipeline.filterContoursOutput().size(); ++i) 
+//			{
+//				rectangle = Imgproc.boundingRect(gripPipeline.filterContoursOutput().get(i));
+//				Util.consoleLog("x=%d y=%d  h=%d w=%d", rectangle.x, rectangle.y, rectangle.height,
+//				         rectangle.width);
+//			}
+			
+			// Image is CameraFeed.imageWidth pixels wide. 5px target zone.
 			// targetOffset is number of pixels from center of image to the center
 			// of the target in the image. A countour is information about the location
 			// of the target in the image. centerX is target center offset from the left
@@ -613,7 +621,10 @@ class Teleop
 
 				gripPipeline.process(robot.cameraThread.getCurrentImage());
 				
-				targetRectangle = Imgproc.boundingRect(gripPipeline.findContoursOutput().get(0));
+				if (!gripPipeline.filterContoursOutput().isEmpty())
+					targetRectangle = Imgproc.boundingRect(gripPipeline.filterContoursOutput().get(0));
+				else
+					targetRectangle = null;
 			}
 			else
 			{
@@ -642,6 +653,7 @@ class Teleop
 			{
 				case BUTTON_YELLOW:
 					robot.cameraThread.ChangeCamera();
+					//Util.consoleLog("cx=%d", robot.cameraFeed2.getCenterX());
 //    				if (launchPadEvent.control.latchedState)
 //    					shooter.HoodUp();
 //    				else
@@ -692,7 +704,7 @@ class Teleop
 				case BUTTON_BLUE_RIGHT:
     				// Start auto targeting on button push, stop on next button push.
     				if (!autoTarget)
-    					seekTargetGrip();
+    					seekTargetGrip2();
     				else
     					autoTarget = false;
 
