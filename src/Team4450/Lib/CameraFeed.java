@@ -26,12 +26,12 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class CameraFeed extends Thread
 {
-	private UsbCamera			currentCamera, cam1, cam2;
+	private UsbCamera			currentCamera;
 	private int					currentCameraIndex;
 	private ArrayList			<UsbCamera>cameras = new ArrayList<UsbCamera>();
 	private Mat 				image = new Mat();
 	private static CameraFeed	cameraFeed;
-	private boolean				isCompetitionRobot, initialized;
+	private boolean				initialized;
 	private MjpegServer			mjpegServer;
 	private CvSink				imageSource;
 	private CvSource			imageOutputStream;
@@ -54,11 +54,11 @@ public class CameraFeed extends Thread
 	 * @return Reference to global CameraFeed object.
 	 */
 	  
-	public static CameraFeed getInstance(boolean isCompetitionRobot) 
+	public static CameraFeed getInstance() 
 	{
 		Util.consoleLog();
 		
-		if (cameraFeed == null) cameraFeed = new CameraFeed(isCompetitionRobot);
+		if (cameraFeed == null) cameraFeed = new CameraFeed();
 	    
 	    return cameraFeed;
 	}
@@ -66,7 +66,7 @@ public class CameraFeed extends Thread
 	// Private constructor means callers must use getInstance.
 	// This is the singleton class model.
 	
-	private CameraFeed(boolean isCompetitionRobot)
+	private CameraFeed()
 	{
 		UsbCameraInfo	cameraInfo, cameraList[];
 		UsbCamera		camera;
@@ -76,8 +76,6 @@ public class CameraFeed extends Thread
     		Util.consoleLog();
     
     		this.setName("CameraFeed");
-    		
-    		this.isCompetitionRobot = isCompetitionRobot;
 
             // Create Mjpeg stream server.
             
@@ -185,10 +183,13 @@ public class CameraFeed extends Thread
 
     		Thread.currentThread().interrupt();
     		
-//    		cam1.free();
-//    		cam2.free();
+    		for(int i = 0; i < cameras.size(); ++i) 
+    		{
+    			currentCamera = cameras.get(i);
+    			currentCamera.free();
+    		}
     		
-    		currentCamera = cam1 = cam2 =  null;
+    		currentCamera = null;
 
     		mjpegServer = null;
 	

@@ -217,7 +217,7 @@ public class Robot extends SampleRobot
    		// feeding images to Grip and Grip provides an MJpeg image stream to the DS.
    		// If we run Grip on Seans surface, we use his IP for the MJpeg stream.
       
-   		cameraThread = CameraFeed.getInstance(isComp); 
+   		cameraThread = CameraFeed.getInstance(); 
    		cameraThread.start();
    		
    		// Start Grip and suspend it when running it on the RoboRio.
