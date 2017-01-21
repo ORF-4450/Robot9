@@ -571,8 +571,6 @@ class Teleop
 		Util.consoleLog();
 		
 		autoTarget = true;
-
-		//Grip.suspendGrip(false);	// Only needed when Grip on RoboRio.
 		
 		SmartDashboard.putBoolean("TargetLocked", false);
 		SmartDashboard.putBoolean("AutoTarget", autoTarget);
@@ -590,13 +588,6 @@ class Teleop
 
 			Util.consoleLog("x=%d y=%d c=%d h=%d w=%d cnt=%d", targetRectangle.x, targetRectangle.y, centerX, targetRectangle.height,
 					         targetRectangle.width, gripPipeline.filterContoursOutput().size());
-			
-//			for(int i = 0; i < gripPipeline.filterContoursOutput().size(); ++i) 
-//			{
-//				rectangle = Imgproc.boundingRect(gripPipeline.filterContoursOutput().get(i));
-//				Util.consoleLog("x=%d y=%d  h=%d w=%d", rectangle.x, rectangle.y, rectangle.height,
-//				         rectangle.width);
-//			}
 			
 			// Image is CameraFeed.imageWidth pixels wide. 5px target zone.
 			// targetOffset is number of pixels from center of image to the center
@@ -633,7 +624,6 @@ class Teleop
 			}
 		}
 		
-		//Grip.suspendGrip(true);	// Only needed when Grip on the RoboRio.
 		autoTarget = false;
 		robot.robotDrive.setSafetyEnabled(true);
 		SmartDashboard.putBoolean("AutoTarget", autoTarget);

@@ -1,12 +1,15 @@
 
 package Team4450.Lib;
 
+import java.util.ArrayList;
+
 import org.opencv.core.Mat;
 
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.UsbCameraInfo;
 import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Timer;
@@ -24,6 +27,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class CameraFeed extends Thread
 {
 	private UsbCamera			currentCamera, cam1, cam2;
+	private int					currentCameraIndex;
+	private ArrayList			<UsbCamera>cameras = new ArrayList<UsbCamera>();
 	private Mat 				image = new Mat();
 	private static CameraFeed	cameraFeed;
 	private boolean				isCompetitionRobot, initialized;
@@ -63,11 +68,14 @@ public class CameraFeed extends Thread
 	
 	private CameraFeed(boolean isCompetitionRobot)
 	{
+		UsbCameraInfo	cameraInfo, cameraList[];
+		UsbCamera		camera;
+
 		try
 		{
     		Util.consoleLog();
     
-    		this.setName("CameraFeed2");
+    		this.setName("CameraFeed");
     		
     		this.isCompetitionRobot = isCompetitionRobot;
 
@@ -85,40 +93,25 @@ public class CameraFeed extends Thread
             
             mjpegServer.setSource(imageOutputStream);
             
-            // Create cameras.
-            // Using one camera at this time.
-            // You have to look at the RoboRio web page to see what
-            // number the camera is assigned to. The name here is
-            // whatever you would like it to be.
+            // Create cameras by getting the list of cameras detected by the RoboRio and
+            // creating camera objects and storing them in an arraylist so we can switch
+            // between them.
+    		
+    		cameraList = UsbCamera.enumerateUsbCameras();
+    		
+    		for(int i = 0; i < cameraList.length; ++i) 
+    		{
+    			cameraInfo = cameraList[i];
+    			
+    			Util.consoleLog("dev=%d name=%s path=%s", cameraInfo.dev, cameraInfo.name, cameraInfo.path);
+    			
+    			camera = new UsbCamera("cam" + cameraInfo.dev, cameraInfo.dev);
+    			
+    			updateCameraSettings(camera);
+    			
+    			cameras.add(camera);
+    		}
 
-//            if (this.isCompetitionRobot)
-//    			cam1 = new UsbCamera("cam0", 0);
-//    		else
-//    			cam1 = new UsbCamera("cam0", 0);
-//    			
-//            updateCameraSettings(cam1);
-//            
-//            cam2 = cam1;
-            
-            // Open cameras when using 2 cameras.
-            // You have to look at the RoboRio web page to see what
-            // numbers the cameras are assigned to. The name here is
-            // whatever you would like it to be.
-            
-            if (this.isCompetitionRobot)
-            {
-    			cam1 = new UsbCamera("cam0", 0);
-    			cam2 = new UsbCamera("cam1", 1);
-            }
-            else
-            {
-            	cam1 = new UsbCamera("cam1", 1);
-    			cam2 = new UsbCamera("cam0", 0);
-            }
-
-            updateCameraSettings(cam1);
-            updateCameraSettings(cam2);
-            
             initialized = true;
             
             // Set starting camera.
@@ -192,8 +185,8 @@ public class CameraFeed extends Thread
 
     		Thread.currentThread().interrupt();
     		
-    		cam1.free();
-    		cam2.free();
+//    		cam1.free();
+//    		cam2.free();
     		
     		currentCamera = cam1 = cam2 =  null;
 
@@ -215,12 +208,18 @@ public class CameraFeed extends Thread
 		
 		changingCamera = true;
 		
-		if (currentCamera == null || currentCamera.equals(cam2))
-			currentCamera = cam1;
+		if (currentCamera == null)
+			currentCamera = cameras.get(currentCameraIndex);
 		else
-			currentCamera = cam2;
-
-		Util.consoleLog("current=%s", currentCamera.getName());
+		{
+			currentCameraIndex++;
+			
+			if (currentCameraIndex == cameras.size()) currentCameraIndex = 0;
+			
+			currentCamera =  cameras.get(currentCameraIndex);
+		}
+		
+		Util.consoleLog("current=(%d) %s", currentCameraIndex, currentCamera.getName());
 		
 	    synchronized (this) 
 	    {
